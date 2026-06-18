@@ -1,7 +1,7 @@
 # 🧪 Build · Validate · Troubleshoot · Test — Enigma-Decentralized-Student-Marketplace
 
 > **enigma-group-project** · student template (implement the TODOs)
-> Repo: <https://github.com/enigma-group-project/Enigma-Decentralized-Student-Marketplace>
+> Repo: <https://github.com/enigma-group-project/Enigma-Decentralized-Student-Marketplace> · GUI: <https://enigma-group-project.github.io/Enigma-Decentralized-Student-Marketplace/>
 
 This repo has three vertical slices (one per member). Two contracts (`EnigCredit` + `Marketplace`) power an on-chain token economy with escrow:
 

@@ -6,6 +6,33 @@
 > Buy/sell student goods with **EnigCredit (ENGC)** — smart-contract escrow + on-chain ratings. No backend.
 > A standalone prototype (token + marketplace), distinct from the attestation-registry prototypes. **3 vertical slices.**
 
+<!-- TRYIT_START -->
+## ▶ Try it
+
+- 🌐 **Live GUI (GitHub Pages):** <https://enigma-group-project.github.io/Enigma-Decentralized-Student-Marketplace/>
+- 💻 **Run locally:** `cd frontend/src && python3 -m http.server 8080` → open <http://localhost:8080>
+- 📖 **Procedures:** [docs/PROCEDURES.md](docs/PROCEDURES.md)
+
+## 🛠 Build · deploy · run · test (per slice)
+
+```bash
+forge build                                                              # compile
+forge install foundry-rs/forge-std OpenZeppelin/openzeppelin-contracts   # one-time
+forge test -vvvv                                                         # run every slice test
+anvil &                                                                  # terminal 2: local chain
+forge script script/Deploy.s.sol:Deploy --rpc-url http://127.0.0.1:8545 --broadcast
+# then: cd frontend/src && python3 -m http.server 8080  →  open the module pages below
+```
+
+| # | Slice | Contract | Test this slice | Frontend page | Key functions |
+|---|-------|----------|-----------------|---------------|---------------|
+| 1 | Token + Wallet | `contracts/EnigCredit.sol` | `forge test --match-contract EnigCreditTest` | `frontend/src/modules/token/` | `mint / transfer / approve` |
+| 2 | Listings | `contracts/Marketplace.sol` | `forge test --match-contract ListingsTest` | `frontend/src/modules/listings/` | `createListing / getListing / totalListings` |
+| 3 | Escrow + Ratings | `contracts/Marketplace.sol` | `forge test --match-contract EscrowTest` | `frontend/src/modules/market/` | `purchaseItem / confirmDelivery / cancelPurchase / rateUser` |
+
+> Compile = `forge build` · deploy = `forge script script/Deploy.s.sol:Deploy --rpc-url ... --broadcast` · run = `python3 -m http.server 8080` · test = `forge test -vvv`
+<!-- TRYIT_END -->
+
 ## Roles
 | Role | Who | Can |
 |------|-----|-----|
