@@ -37,4 +37,27 @@ contract EnigCreditTest is Test {
         token.transfer(alice, 100 ether);
         assertEq(token.balanceOf(alice), 100 ether);
     }
+
+    // ---- Token-v2026 baseline additions ----
+    function test_BurnReducesSupply() public {
+        uint256 s0 = token.totalSupply();
+        token.burn(1_000 ether);
+        assertEq(token.totalSupply(), s0 - 1_000 ether);
+    }
+
+    function test_Permit() public {
+        uint256 pk = 0xBEEF;
+        address signer = vm.addr(pk);
+        address spender = address(0x5);
+        uint256 value = 5 ether;
+        uint256 deadline = block.timestamp + 1 days;
+        bytes32 structHash = keccak256(abi.encode(
+            keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"),
+            signer, spender, value, token.nonces(signer), deadline));
+        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", token.DOMAIN_SEPARATOR(), structHash));
+        (uint8 v, bytes32 r, bytes32 sg) = vm.sign(pk, digest);
+        token.permit(signer, spender, value, deadline, v, r, sg);
+        assertEq(token.allowance(signer, spender), value);
+    }
+
 }
