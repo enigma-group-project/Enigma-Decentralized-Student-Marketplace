@@ -27,9 +27,11 @@ forge --version        # ✅ prints a forge version
 
 ### A1. Get the code
 ```bash
-git clone https://github.com/enigma-group-project/Enigma-Decentralized-Student-Marketplace.git
+git clone --recursive https://github.com/enigma-group-project/Enigma-Decentralized-Student-Marketplace.git
 cd Enigma-Decentralized-Student-Marketplace
-forge install foundry-rs/forge-std OpenZeppelin/openzeppelin-contracts   # test + OZ deps
+git submodule update --init --recursive   # restores pinned deps (OZ v5.1.0, forge-std) per foundry.lock
+# Fallback if you cloned without --recursive:
+forge install                              # no args — syncs to foundry.lock
 ```
 
 ### A2. Compile
@@ -52,9 +54,9 @@ forge test --gas-report                          # gas numbers for the evaluatio
 | Symptom | Cause | Fix |
 |---|---|---|
 | `forge: command not found` | Foundry not installed/loaded | `curl -L https://foundry.paradigm.xyz \| bash` then `foundryup`; reopen shell |
-| `Source "forge-std/Test.sol" not found` | dep missing on fresh clone | `forge install foundry-rs/forge-std OpenZeppelin/openzeppelin-contracts` |
-| `Source "@openzeppelin/contracts/…" not found` | OZ not installed | `forge install OpenZeppelin/openzeppelin-contracts` |
-| `unexpected argument '--no-commit'` | old flag, removed in forge 1.7+ | run `forge install foundry-rs/forge-std OpenZeppelin/openzeppelin-contracts` (no `--no-commit`) |
+| `Source "forge-std/Test.sol" not found` | dep missing on fresh clone | `forge install foundry-rs/forge-std OpenZeppelin/openzeppelin-contracts@v5.1.0` |
+| `Source "@openzeppelin/contracts/…" not found` | OZ not installed | `forge install OpenZeppelin/openzeppelin-contracts@v5.1.0` |
+| `unexpected argument '--no-commit'` | old flag, removed in forge 1.7+ | run `forge install foundry-rs/forge-std OpenZeppelin/openzeppelin-contracts@v5.1.0` (no `--no-commit`) |
 | `Source file requires different compiler version` | wrong solc | `foundry.toml` pins `0.8.20`; run `foundryup` (the IDE Solidity plugin may warn — Foundry is authoritative) |
 | test reverts `TODO(memberN): implement …` | slice not implemented yet | implement that function in `contracts/EnigCredit.sol` or `contracts/Marketplace.sol` |
 | `Connection refused` on deploy | Anvil not running | start `anvil` in a second terminal |
@@ -122,7 +124,7 @@ Same rubric the TA uses (defined in `cyber-enigma/autograder/rubric.yml`): compi
 
 **Local (fastest, offline):**
 ```bash
-forge install foundry-rs/forge-std OpenZeppelin/openzeppelin-contracts
+forge install foundry-rs/forge-std OpenZeppelin/openzeppelin-contracts@v5.1.0
 python3 scripts/grade.py            # prints the score table; writes grade.json
 ```
 `scripts/grade.py` is a bundled copy of the canonical grader for quick self-checks.
