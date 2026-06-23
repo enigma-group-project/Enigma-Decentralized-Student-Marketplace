@@ -27,9 +27,11 @@ forge --version        # ✅ prints a forge version
 
 ### A1. Get the code
 ```bash
-git clone https://github.com/enigma-group-project/Enigma-Decentralized-Student-Marketplace.git
+git clone --recursive https://github.com/enigma-group-project/Enigma-Decentralized-Student-Marketplace.git
 cd Enigma-Decentralized-Student-Marketplace
-forge install foundry-rs/forge-std OpenZeppelin/openzeppelin-contracts@v5.1.0   # test + OZ deps
+git submodule update --init --recursive   # restores pinned deps (OZ v5.1.0, forge-std) per foundry.lock
+# Fallback if you cloned without --recursive:
+forge install                              # no args — syncs to foundry.lock
 ```
 
 ### A2. Compile
