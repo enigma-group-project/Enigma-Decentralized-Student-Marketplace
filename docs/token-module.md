@@ -11,3 +11,7 @@ metadata · initial supply · owner mint · non-owner revert · transfer.
 
 ## TODO checklist
 - [ ] balance auto-refresh on account/chain change · [ ] "Switch to Sepolia" helper.
+
+## Walkthrough
+
+📸 Connect MetaMask + mint ENGC, step by step with screenshots: [`PROCEDURES.md` §A5b](PROCEDURES.md#a5b-token-module--connect-metamask--mint-engc-screenshot-walkthrough).
