@@ -91,7 +91,7 @@ reentrancy protection · on-chain event indexing · testnet deploy + Etherscan v
 | member1 | Token + Wallet | `feature/member1-token` | _screenshot / test output_ |
 | member2 | Listings | `feature/member2-listings` | _…_ |
 | member3 | Escrow / Trade | `feature/member3-escrow` | _…_ |
-| member4 | Reputation / Ratings | `feature/member4-reputation` | _…_ |
+| member4 | Reputation / Ratings | `feature/member4-reputation` | 5/5 mock tests passing; rateUser implemented; forge build clean |
 
 ## 🔐 Security, standards & study
 - [`SECURITY_ASSURANCE.md`](SECURITY_ASSURANCE.md) · [`docs/token-standards.md`](docs/token-standards.md) · [`docs/study-guide.md`](docs/study-guide.md) · Slither + fuzz/invariant (`test/Invariant.t.sol`).
