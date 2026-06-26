@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 import {Marketplace} from "./Marketplace.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 /// @title Reputation — Slice 4 (Reputation / Ratings)  [STUDENT TEMPLATE]

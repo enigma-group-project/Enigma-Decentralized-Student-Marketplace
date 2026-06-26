@@ -9,5 +9,10 @@
 ## Tests (`test/Listings.t.sol`)
 create stores+returns id · empty title revert · zero price revert · ids increment.
 
+## Notes
+- Listings are only shown when status is `Available`.
+- The frontend can be extended later with filtering, sorting, and image rendering.
+
 ## TODO checklist
-- [ ] search + category filter + sort · [ ] render avg rating per listing.
+- [ ] search + category filter + sort
+- [ ] render avg rating per listing
