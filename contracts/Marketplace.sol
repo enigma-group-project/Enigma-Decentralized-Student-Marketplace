@@ -20,7 +20,9 @@ contract Marketplace is ReentrancyGuard, Pausable, Ownable {
     event ItemPurchased(uint256 indexed id, address indexed buyer);
     event DeliveryConfirmed(uint256 indexed id, address indexed seller, uint256 amount);
     event PurchaseCancelled(uint256 indexed id, address indexed buyer);
+    event ListingCancelled(uint256 indexed id, address indexed seller);
     error EmptyTitle(); error BadPrice(); error NotAvailable(); error SelfPurchase(); error NotPending(); error NotBuyer(); error TimeoutNotReached();
+    error NotSeller();
     constructor(address token_) Ownable(msg.sender) { token = IERC20(token_); }
     function pause() external onlyOwner { _pause(); }
     function unpause() external onlyOwner { _unpause(); }
@@ -61,5 +63,16 @@ contract Marketplace is ReentrancyGuard, Pausable, Ownable {
     function cancelPurchase(uint256 id) external nonReentrant {
         // TODO(member3): require Pending+buyer+timeout; reset; token.safeTransfer(buyer); emit PurchaseCancelled.
         revert("TODO(member3): implement cancelPurchase");
+    }
+
+    /// @notice Allow the seller to cancel an available listing
+    function cancelListing(uint256 id) external nonReentrant {
+        Listing storage l = listings[id];
+        if (l.seller != msg.sender) revert NotSeller();
+        if (l.status != Status.Available) revert NotAvailable();
+
+        l.status = Status.Cancelled;
+
+        emit ListingCancelled(id, msg.sender);
     }
 }
