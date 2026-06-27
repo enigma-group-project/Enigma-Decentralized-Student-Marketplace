@@ -29,3 +29,19 @@ document.getElementById("mint").onclick = async () => {
     out("✅ Minted " + amount + " ENGC to " + to + "\nNew balance: " + formatTokens(bal) + " ENGC");
   } catch (e) { out(String(e.message || e)); }
 };
+
+document.getElementById("faucet").onclick = async () => {
+  try {
+    if (!wc) { out("Connect your wallet first."); return; }
+    out("Claiming demo ENGC from the faucet...");
+    const tx = await wc.token.faucet();
+    out("Waiting for confirmation...  tx: " + tx.hash);
+    await tx.wait();
+    const bal = await readContracts().token.balanceOf(addr);
+    document.getElementById("bal").textContent = "Balance: " + formatTokens(bal) + " ENGC";
+    out("✅ Faucet claim confirmed.\nNew balance: " + formatTokens(bal) + " ENGC");
+  } catch (e) {
+    const msg = String(e.reason || e.shortMessage || e.message || e);
+    out(/FaucetCooldown/.test(msg) ? "⏳ Faucet cooldown active — try again later (1h per wallet)." : msg);
+  }
+};
