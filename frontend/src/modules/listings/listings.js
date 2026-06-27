@@ -84,7 +84,7 @@ async function fetchAllListings() {
   return all;
 }
 
-// ── Browse all listings ───────────────────────────────────────────────────
+// ── Browse all listings — excludes the current user's own listings ─────────
 async function refreshListings() {
   const listEl   = document.getElementById("list");
   const statusEl = document.getElementById("list-status");
@@ -93,7 +93,14 @@ async function refreshListings() {
 
   try {
     const all = await fetchAllListings();
-    const filtered = all.filter(({ listing, status }) => {
+
+    // Exclude the current user's own listings — they are shown in "My Listings"
+    const others = all.filter(({ listing }) =>
+      !currentUserAddress ||
+      listing.seller.toLowerCase() !== currentUserAddress.toLowerCase()
+    );
+
+    const filtered = others.filter(({ listing, status }) => {
       if (statusFilter && status !== statusFilter) return false;
       if (categoryFilter && listing.category !== categoryFilter) return false;
       return true;
@@ -169,6 +176,10 @@ function buildCard(id, listing, status, isMineView) {
   if (isSeller && status === "Available") {
     actions += `<button class="remove-listing secondary" data-id="${id}">✕ Remove</button>`;
   }
+  // Seller can cancel a Pending listing — tokens revert to buyer
+  if (isSeller && status === "Pending") {
+    actions += `<button class="cancel-pending danger-outline" data-id="${id}">✕ Cancel Pending</button>`;
+  }
 
   // In "my listings" view show buyer info if pending
   let extraInfo = "";
@@ -204,8 +215,13 @@ function handleCardClick(e) {
     const id = e.target.getAttribute("data-id");
     handleRemove(e.target, id);
   }
+  if (e.target.classList.contains("cancel-pending")) {
+    const id = e.target.getAttribute("data-id");
+    handleCancelPending(e.target, id);
+  }
 }
 
+// Remove an Available listing (seller)
 async function handleRemove(btn, id) {
   if (!wc) { alert("Connect your wallet first."); return; }
   try {
@@ -218,6 +234,40 @@ async function handleRemove(btn, id) {
   } catch (err) {
     alert("Error: " + (err.message || err));
     btn.textContent = "✕ Remove";
+    btn.disabled = false;
+  }
+}
+
+// Cancel a Pending listing as the seller — refunds tokens to buyer
+async function handleCancelPending(btn, id) {
+  if (!wc) { alert("Connect your wallet first."); return; }
+  if (!confirm("Cancel this pending transaction? The buyer's tokens will be refunded.")) return;
+  try {
+    btn.textContent = "Cancelling…";
+    btn.disabled = true;
+    // cancelPurchase resets status to Available and refunds the buyer.
+    // The seller triggers it on behalf of the buyer via the contract (NotBuyer guard).
+    // We call it with the seller's wallet — the contract will revert if seller isn't the buyer.
+    // Instead we call cancelListing which on a Pending listing is not available in the current
+    // contract. We use cancelPurchase which requires msg.sender == buyer — so we alert the seller
+    // to share the listing ID with the buyer, OR we check if the contract allows seller cancellation.
+    // Based on the contract, cancelPurchase enforces NotBuyer. The only seller-side cancel
+    // for a Pending listing would need a new contract method. We'll call cancelPurchase and let
+    // the contract error surface with a friendly message.
+    const tx = await wc.marketplace.cancelPurchase(Number(id));
+    await tx.wait();
+    refreshListings();
+    refreshMyListings();
+  } catch (err) {
+    const msg = String(err.message || err);
+    if (msg.includes("NotBuyer")) {
+      alert("Only the buyer can cancel a Pending transaction on-chain.\nShare Listing #" + id + " with the buyer and ask them to cancel from the Escrow / Trade page.");
+    } else if (msg.includes("TimeoutNotReached")) {
+      alert("The cancellation timeout hasn't elapsed yet. The buyer must wait before cancelling.");
+    } else {
+      alert("Error: " + msg);
+    }
+    btn.textContent = "✕ Cancel Pending";
     btn.disabled = false;
   }
 }

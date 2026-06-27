@@ -44,70 +44,75 @@
         <p>Purchase items securely — tokens held in escrow until delivery is confirmed.</p>
       </div>
       <div class="topbar-actions">
+        <button id="refresh-market" class="secondary">↻ Refresh</button>
         <a href="../listings/index.html" class="btn secondary" style="text-decoration:none;">← Back to Listings</a>
       </div>
     </div>
 
     <div class="page-body">
 
-      <!-- No listing selected — redirect prompt -->
-      <div id="no-listing-msg" class="card" style="display:none;">
-        <div class="no-listing-banner">
-          <div class="no-listing-icon">🏷️</div>
-          <div class="no-listing-text">
-            <div class="no-listing-title">No listing selected</div>
-            <p>To start a trade, browse the listings page and click <strong>Buy Now</strong> on any available item. You'll be brought back here automatically with the listing loaded.</p>
-          </div>
-        </div>
-        <div class="btn-row">
-          <a href="../listings/index.html" class="btn" style="text-decoration:none;">🏷️ Browse Listings</a>
-        </div>
-      </div>
+      <!-- ── Two-column Escrow layout ──────────────────────────────────── -->
+      <div class="escrow-columns">
 
-      <!-- Product info card — populated by JS -->
-      <div class="card" id="listing-preview" style="display:none;">
-        <div class="card-title">📦 Product Information</div>
-        <div id="listing-detail"></div>
-      </div>
+        <!-- LEFT: Approve / Purchase -->
+        <div class="escrow-col">
+          <div class="escrow-col-title">🛒 Approve &amp; Purchase</div>
+          <p style="font-size:.84rem;color:var(--muted);margin:0;">
+            Browse a listing and click <strong>Buy Now</strong> to load it here, then approve your ENGC allowance and lock tokens in escrow.
+          </p>
 
-      <!-- Trade steps -->
-      <div class="card" id="trade-card" style="display:none;">
-        <div class="card-title">🤝 Trade Actions</div>
+          <!-- No listing selected prompt -->
+          <div id="no-listing-msg">
+            <div style="text-align:center;padding:20px 0;">
+              <div style="font-size:2.2rem;margin-bottom:8px;">🏷️</div>
+              <div style="font-weight:600;margin-bottom:6px;">No listing selected</div>
+              <p style="font-size:.82rem;color:var(--muted);margin:0 0 14px;">Click <strong>Buy Now</strong> on any available listing to start a trade.</p>
+              <a href="../listings/index.html" class="btn" style="text-decoration:none;font-size:.84rem;">Browse Listings</a>
+            </div>
+          </div>
 
-        <div class="steps">
-          <div class="step" id="step1">
-            <span class="step-num">1</span>
-            Approve ENGC
+          <!-- Product info — populated by JS -->
+          <div id="listing-preview" style="display:none;">
+            <div id="listing-detail"></div>
           </div>
-          <div class="step" id="step2">
-            <span class="step-num">2</span>
-            Purchase (Escrow)
-          </div>
-          <div class="step" id="step3">
-            <span class="step-num">3</span>
-            Confirm Delivery
-          </div>
-        </div>
 
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <div>
-            <p style="font-size:.84rem;color:var(--muted);margin-bottom:10px;">Step 1 & 2: Approve your ENGC allowance, then lock tokens in escrow.</p>
+          <!-- Trade steps + buy button -->
+          <div id="trade-card" style="display:none;">
+            <div class="steps" style="margin-bottom:14px;">
+              <div class="step" id="step1">
+                <span class="step-num">1</span>
+                Approve ENGC
+              </div>
+              <div class="step" id="step2">
+                <span class="step-num">2</span>
+                Purchase (Escrow)
+              </div>
+              <div class="step" id="step3">
+                <span class="step-num">3</span>
+                Confirm Delivery
+              </div>
+            </div>
+            <p style="font-size:.82rem;color:var(--muted);margin:0 0 10px;">Approves your ENGC allowance, then locks tokens in escrow.</p>
             <button id="buy">🛒 Buy (Approve + Purchase)</button>
           </div>
-          <hr style="border:none;border-top:1px solid var(--line);"/>
-          <div>
-            <p style="font-size:.84rem;color:var(--muted);margin-bottom:10px;">Step 3: Once you've received the item, confirm delivery to release funds to the seller.</p>
-            <button id="confirm">✅ Confirm Delivery</button>
-          </div>
-          <hr style="border:none;border-top:1px solid var(--line);"/>
-          <div>
-            <p style="font-size:.84rem;color:var(--muted);margin-bottom:10px;">Cancel after the timeout period expires to receive a refund.</p>
-            <button id="cancel" class="danger" style="background:transparent;color:var(--danger);border:1px solid var(--danger);">✕ Cancel Purchase (after timeout)</button>
+
+          <div id="out" class="status-box"></div>
+        </div>
+
+        <!-- RIGHT: My Pending Purchases — Confirm / Cancel -->
+        <div class="escrow-col">
+          <div class="escrow-col-title">📦 My Pending Purchases</div>
+          <p style="font-size:.84rem;color:var(--muted);margin:0;">
+            Items you've purchased that are awaiting delivery confirmation. Connect your wallet to see them.
+          </p>
+
+          <div id="pending-list-wrap">
+            <div class="escrow-empty">Connect your wallet to view pending purchases.</div>
           </div>
         </div>
 
-        <div id="out" class="status-box"></div>
-      </div>
+      </div><!-- /.escrow-columns -->
+
     </div>
   </div>
 </div>
