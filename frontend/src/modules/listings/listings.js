@@ -1,6 +1,8 @@
 import { readContracts, mountNetworkSelector, parseTokens, formatTokens } from "../../shared/app.js";
 import { mountSidebarWallet } from "../../shared/wallet.js";
 
+mountNetworkSelector("net");
+
 const postOut = (m, type = "") => {
   const el = document.getElementById("post-out");
   el.textContent = m;
