@@ -308,6 +308,8 @@ async function handleRate(btn, id) {
     const tx = await wc.reputation.rateUser(Number(id), stars);
     await tx.wait();
     btn.textContent = "✅ Rated";
+    refreshListings();
+    refreshMyListings();
     // Leave disabled — they've used their one rating for this listing
   } catch (err) {
     const msg = String(err.message || err);
