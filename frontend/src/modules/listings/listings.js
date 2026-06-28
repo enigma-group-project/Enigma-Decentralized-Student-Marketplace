@@ -177,9 +177,9 @@ function buildCard(id, listing, status, isMineView) {
     actions += `<button class="remove-listing secondary" data-id="${id}">✕ Remove</button>`;
   }
   // Seller can cancel a Pending listing — tokens revert to buyer
-  if (isSeller && status === "Pending") {
-    actions += `<button class="cancel-pending danger-outline" data-id="${id}">✕ Cancel Pending</button>`;
-  }
+if (isSeller && status === "Pending") {
+    actions += `<button class="cancel-listing-pending danger-outline" data-id="${id}">✕ Cancel & Refund Buyer</button>`;
+}
 
   // In "my listings" view show buyer info if pending
   let extraInfo = "";
@@ -215,7 +215,7 @@ function handleCardClick(e) {
     const id = e.target.getAttribute("data-id");
     handleRemove(e.target, id);
   }
-  if (e.target.classList.contains("cancel-pending")) {
+  if (e.target.classList.contains("cancel-listing-pending")) {
     const id = e.target.getAttribute("data-id");
     handleCancelPending(e.target, id);
   }
