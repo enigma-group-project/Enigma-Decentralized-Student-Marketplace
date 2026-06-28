@@ -1,7 +1,5 @@
-import { readContracts, mountNetworkSelector, parseTokens, formatTokens } from "../../shared/app.js";
+import { readContracts, parseTokens, formatTokens } from "../../shared/app.js";
 import { mountSidebarWallet } from "../../shared/wallet.js";
-
-mountNetworkSelector("net");
 
 const postOut = (m, type = "") => {
   const el = document.getElementById("post-out");
@@ -53,7 +51,11 @@ document.getElementById("create").onclick = async () => {
     postOut("Posting listing…", "pending");
     const tx = await wc.marketplace.createListing(title, category, condition, parseTokens(price), imageUrl);
     const receipt = await tx.wait();
-    const id = receipt.events?.find(e => e.event === "ListingCreated")?.args?.id;
+    const iface = wc.marketplace.interface;
+    const log = receipt.logs
+      .map(l => { try { return iface.parseLog(l); } catch { return null; } })
+      .find(l => l?.name === "ListingCreated");
+    const id = log?.args?.id;
     postOut(`✅ Listing posted${id !== undefined ? ` #${id}` : ""}`, "ok");
     ["title", "price", "imageUrl"].forEach(f => document.getElementById(f).value = "");
     document.getElementById("category").value = "";
@@ -75,13 +77,23 @@ document.getElementById("categoryFilter").onchange = (e) => { categoryFilter = e
 async function fetchAllListings() {
   const rc = readContracts();
   const total = Number(await rc.marketplace.totalListings());
-  const all = [];
-  for (let i = 0; i < total; i++) {
-    const listing = await rc.marketplace.getListing(i);
-    const statusMap = ["Available", "Pending", "Sold", "Cancelled"];
-    all.push({ id: i, listing, status: statusMap[Number(listing.status)] });
-  }
-  return all;
+  const statusMap = ["Available", "Pending", "Sold", "Cancelled"];
+  const ids = Array.from({ length: total }, (_, i) => i);
+  const listings = await Promise.all(ids.map(i => rc.marketplace.getListing(i)));
+  return listings.map((listing, i) => ({ id: i, listing, status: statusMap[Number(listing.status)] }));
+}
+
+// ── Fetch rating string for an address ───────────────────────────────────
+async function fetchRating(address) {
+  try {
+    const rc = readContracts();
+    const [total, count] = await rc.reputation.getAverageRating(address);
+    if (Number(count) > 0) {
+      const avg = (Number(total) / Number(count)).toFixed(1);
+      return ` <span class="rating-badge">⭐ ${avg}</span>`;
+    }
+  } catch (_) { /* best-effort */ }
+  return ` <span class="rating-badge">⭐ 0.0</span>`;
 }
 
 // ── Browse all listings — excludes the current user's own listings ─────────
@@ -94,7 +106,6 @@ async function refreshListings() {
   try {
     const all = await fetchAllListings();
 
-    // Exclude the current user's own listings — they are shown in "My Listings"
     const others = all.filter(({ listing }) =>
       !currentUserAddress ||
       listing.seller.toLowerCase() !== currentUserAddress.toLowerCase()
@@ -117,7 +128,16 @@ async function refreshListings() {
       </div>`;
       return;
     }
-    listEl.innerHTML = filtered.map(({ id, listing, status }) => buildCard(id, listing, status, false)).join("");
+
+    const cards = await Promise.all(filtered.map(async ({ id, listing, status }) => {
+      const sellerRating = await fetchRating(listing.seller);
+      const zeroAddr = "0x0000000000000000000000000000000000000000";
+      const buyerRating = (status === "Pending" || status === "Sold") && listing.buyer && listing.buyer !== zeroAddr
+        ? await fetchRating(listing.buyer)
+        : ` <span class="rating-badge">⭐ 0.0</span>`;
+      return buildCard(id, listing, status, false, sellerRating, buyerRating);
+    }));
+    listEl.innerHTML = cards.join("");
   } catch (e) {
     listEl.innerHTML = "";
     statusEl.textContent = String(e.message || e);
@@ -152,14 +172,23 @@ async function refreshMyListings() {
       </div>`;
       return;
     }
-    gridEl.innerHTML = mine.map(({ id, listing, status }) => buildCard(id, listing, status, true)).join("");
+
+    const cards = await Promise.all(mine.map(async ({ id, listing, status }) => {
+      const sellerRating = await fetchRating(listing.seller);
+      const zeroAddr = "0x0000000000000000000000000000000000000000";
+      const buyerRating = (status === "Pending" || status === "Sold") && listing.buyer && listing.buyer !== zeroAddr
+        ? await fetchRating(listing.buyer)
+        : ` <span class="rating-badge">⭐ 0.0</span>`;
+      return buildCard(id, listing, status, true, sellerRating, buyerRating);
+    }));
+    gridEl.innerHTML = cards.join("");
   } catch (e) {
     gridEl.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><p style="color:var(--danger)">${e.message || e}</p></div>`;
   }
 }
 
 // ── Card builder ──────────────────────────────────────────────────────────
-function buildCard(id, listing, status, isMineView, sellerRating = "", buyerRating = "") {
+function buildCard(id, listing, status, isMineView, sellerRating = " <span class=\"rating-badge\">⭐ 0.0</span>", buyerRating = " <span class=\"rating-badge\">⭐ 0.0</span>") {
   const price = formatTokens(listing.priceInTokens);
   const isSeller = currentUserAddress && listing.seller.toLowerCase() === currentUserAddress.toLowerCase();
   const sellerShort = listing.seller.slice(0, 6) + "…" + listing.seller.slice(-4);
@@ -179,10 +208,20 @@ function buildCard(id, listing, status, isMineView, sellerRating = "", buyerRati
   if (isSeller && status === "Pending") {
     actions += `<button class="cancel-listing-pending danger-outline" data-id="${id}">✕ Cancel & Refund Buyer</button>`;
   }
+  if (isSeller && status === "Sold") {
+    actions += `<button class="rate-buyer" data-id="${id}">⭐ Rate Buyer</button>`;
+  }
 
-  // In "my listings" view show buyer info if pending
+  const zeroAddr = "0x0000000000000000000000000000000000000000";
+  const isBuyer = currentUserAddress && listing.buyer && listing.buyer !== zeroAddr
+    && listing.buyer.toLowerCase() === currentUserAddress.toLowerCase();
+  if (isBuyer && status === "Sold") {
+    actions += `<button class="rate-seller" data-id="${id}">⭐ Rate Seller</button>`;
+  }
+
+  // In "my listings" view show buyer info if pending or sold
   let extraInfo = "";
-  if (isMineView && status === "Pending") {
+  if (listing.buyer && listing.buyer !== zeroAddr && (status === "Pending" || status === "Sold")) {
     const buyerShort = listing.buyer.slice(0, 6) + "…" + listing.buyer.slice(-4);
     extraInfo = `<div class="listing-card-seller" style="margin-top:4px;">Buyer: ${buyerShort}${buyerRating}</div>`;
   }
@@ -214,9 +253,13 @@ function handleCardClick(e) {
     const id = e.target.getAttribute("data-id");
     handleRemove(e.target, id);
   }
-  if (e.target.classList.contains("cancel-pending")) {
+  if (e.target.classList.contains("cancel-listing-pending")) {
     const id = e.target.getAttribute("data-id");
     handleCancelPending(e.target, id);
+  }
+  if (e.target.classList.contains("rate-seller") || e.target.classList.contains("rate-buyer")) {
+    const id = e.target.getAttribute("data-id");
+    handleRate(e.target, id);
   }
 }
 
@@ -237,37 +280,47 @@ async function handleRemove(btn, id) {
   }
 }
 
-// Cancel a Pending listing as the seller — refunds tokens to buyer
+// Cancel a Pending listing as the seller — contract refunds escrowed tokens to buyer
 async function handleCancelPending(btn, id) {
   if (!wc) { alert("Connect your wallet first."); return; }
-  if (!confirm("Cancel this pending transaction? The buyer's tokens will be refunded.")) return;
+  if (!confirm("Cancel this listing? The buyer's tokens will be refunded immediately.")) return;
   try {
     btn.textContent = "Cancelling…";
     btn.disabled = true;
-    // cancelPurchase resets status to Available and refunds the buyer.
-    // The seller triggers it on behalf of the buyer via the contract (NotBuyer guard).
-    // We call it with the seller's wallet — the contract will revert if seller isn't the buyer.
-    // Instead we call cancelListing which on a Pending listing is not available in the current
-    // contract. We use cancelPurchase which requires msg.sender == buyer — so we alert the seller
-    // to share the listing ID with the buyer, OR we check if the contract allows seller cancellation.
-    // Based on the contract, cancelPurchase enforces NotBuyer. The only seller-side cancel
-    // for a Pending listing would need a new contract method. We'll call cancelPurchase and let
-    // the contract error surface with a friendly message.
-    const tx = await wc.marketplace.cancelPurchase(Number(id));
+    const tx = await wc.marketplace.cancelListing(Number(id));
     await tx.wait();
     refreshListings();
     refreshMyListings();
   } catch (err) {
+    alert("Error: " + (err.message || err));
+    btn.textContent = "✕ Cancel & Refund Buyer";
+    btn.disabled = false;
+  }
+}
+
+// Rate the other party after a Sold listing
+async function handleRate(btn, id) {
+  if (!wc) { alert("Connect your wallet first."); return; }
+  const stars = Number(prompt("Rate 1–5 stars:", "5"));
+  if (!stars || stars < 1 || stars > 5) { alert("Enter a number between 1 and 5."); return; }
+  try {
+    btn.textContent = "Submitting…";
+    btn.disabled = true;
+    const tx = await wc.reputation.rateUser(Number(id), stars);
+    await tx.wait();
+    btn.textContent = "✅ Rated";
+    refreshListings();
+    refreshMyListings();
+  } catch (err) {
     const msg = String(err.message || err);
-    if (msg.includes("NotBuyer")) {
-      alert("Only the buyer can cancel a Pending transaction on-chain.\nShare Listing #" + id + " with the buyer and ask them to cancel from the Escrow / Trade page.");
-    } else if (msg.includes("TimeoutNotReached")) {
-      alert("The cancellation timeout hasn't elapsed yet. The buyer must wait before cancelling.");
+    if (msg.includes("AlreadyRated")) {
+      btn.textContent = "✅ Already Rated";
+      btn.disabled = true;
     } else {
       alert("Error: " + msg);
+      btn.textContent = "⭐ Rate";
+      btn.disabled = false;
     }
-    btn.textContent = "✕ Cancel Pending";
-    btn.disabled = false;
   }
 }
 
