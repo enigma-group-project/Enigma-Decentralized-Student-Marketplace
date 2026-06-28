@@ -299,7 +299,7 @@ async function handleCancelPending(btn, id) {
   }
 }
 
-// Rate the other party after a Sold listing
+// Rate the other party after a Sold listing (buyer rates seller, seller rates buyer)
 async function handleRate(btn, id) {
   if (!wc) { alert("Connect your wallet first."); return; }
   const stars = Number(prompt("Rate 1–5 stars:", "5"));
@@ -310,8 +310,7 @@ async function handleRate(btn, id) {
     const tx = await wc.reputation.rateUser(Number(id), stars);
     await tx.wait();
     btn.textContent = "✅ Rated";
-    refreshListings();
-    refreshMyListings();
+    // Leave disabled — they've used their one rating for this listing
   } catch (err) {
     const msg = String(err.message || err);
     if (msg.includes("AlreadyRated")) {
