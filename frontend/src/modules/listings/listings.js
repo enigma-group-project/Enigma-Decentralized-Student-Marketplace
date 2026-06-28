@@ -325,30 +325,5 @@ async function handleRate(btn, id) {
   }
 }
 
-// Rate the other party after a Sold listing (buyer rates seller, seller rates buyer)
-async function handleRate(btn, id) {
-  if (!wc) { alert("Connect your wallet first."); return; }
-  const stars = Number(prompt("Rate 1–5 stars:", "5"));
-  if (!stars || stars < 1 || stars > 5) { alert("Enter a number between 1 and 5."); return; }
-  try {
-    btn.textContent = "Submitting…";
-    btn.disabled = true;
-    const tx = await wc.reputation.rateUser(Number(id), stars);
-    await tx.wait();
-    btn.textContent = "✅ Rated";
-    // Leave disabled — they've used their one rating for this listing
-  } catch (err) {
-    const msg = String(err.message || err);
-    if (msg.includes("AlreadyRated")) {
-      btn.textContent = "✅ Already Rated";
-      btn.disabled = true;
-    } else {
-      alert("Error: " + msg);
-      btn.textContent = "⭐ Rate";
-      btn.disabled = false;
-    }
-  }
-}
-
 document.getElementById("list").addEventListener("click", handleCardClick);
 document.getElementById("my-list").addEventListener("click", handleCardClick);
