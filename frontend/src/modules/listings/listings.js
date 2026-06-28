@@ -159,7 +159,7 @@ async function refreshMyListings() {
 }
 
 // ── Card builder ──────────────────────────────────────────────────────────
-function buildCard(id, listing, status, isMineView) {
+function buildCard(id, listing, status, isMineView, sellerRating = "", buyerRating = "") {
   const price = formatTokens(listing.priceInTokens);
   const isSeller = currentUserAddress && listing.seller.toLowerCase() === currentUserAddress.toLowerCase();
   const sellerShort = listing.seller.slice(0, 6) + "…" + listing.seller.slice(-4);
@@ -176,16 +176,15 @@ function buildCard(id, listing, status, isMineView) {
   if (isSeller && status === "Available") {
     actions += `<button class="remove-listing secondary" data-id="${id}">✕ Remove</button>`;
   }
-  // Seller can cancel a Pending listing — tokens revert to buyer
   if (isSeller && status === "Pending") {
-    actions += `<button class="cancel-pending danger-outline" data-id="${id}">✕ Cancel Pending</button>`;
+    actions += `<button class="cancel-listing-pending danger-outline" data-id="${id}">✕ Cancel & Refund Buyer</button>`;
   }
 
   // In "my listings" view show buyer info if pending
   let extraInfo = "";
   if (isMineView && status === "Pending") {
     const buyerShort = listing.buyer.slice(0, 6) + "…" + listing.buyer.slice(-4);
-    extraInfo = `<div class="listing-card-seller" style="margin-top:4px;">Buyer: ${buyerShort}</div>`;
+    extraInfo = `<div class="listing-card-seller" style="margin-top:4px;">Buyer: ${buyerShort}${buyerRating}</div>`;
   }
 
   return `<div class="listing-card">
@@ -198,7 +197,7 @@ function buildCard(id, listing, status, isMineView) {
         <span class="tag">${listing.condition}</span>
         <span class="${statusCls}">${status}</span>
       </div>
-      ${!isMineView ? `<div class="listing-card-seller">Seller: ${sellerShort}</div>` : ""}
+      ${!isMineView ? `<div class="listing-card-seller">Seller: ${sellerShort}${sellerRating}</div>` : ""}
       ${extraInfo}
     </div>
     ${actions ? `<div class="listing-card-actions">${actions}</div>` : ""}
