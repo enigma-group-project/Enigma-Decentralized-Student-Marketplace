@@ -894,3 +894,11 @@ button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
   .form-grid, .listings-grid, .escrow-columns { grid-template-columns: 1fr !important; }
   .product-info-grid { flex-direction: column; }
 }
+
+/* Placeholder hint inside empty status/output boxes (disappears once a result is shown). */
+.status-box:empty::before {
+  content: "Transaction status and results will appear here.";
+  color: var(--subtle);
+  font-style: italic;
+  opacity: 0.75;
+}
