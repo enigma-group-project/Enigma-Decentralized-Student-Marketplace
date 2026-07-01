@@ -90,35 +90,25 @@ function highlightInline(spans, n) {
 
 function buildPurchaseItem({ id, listing, rated }) {
   const sellerShort = listing.seller.slice(0, 6) + "…" + listing.seller.slice(-4);
-  if (rated) {
+  if (!rated) {
     return `<div class="escrow-pending-item">
       <div class="escrow-pending-item-title">${listing.title}</div>
       <div class="escrow-pending-item-meta">
         <span>Seller: ${sellerShort}</span>
         <span>Listing #${id}</span>
       </div>
-      <div class="escrow-pending-item-meta">
-        <span style="color:var(--ok)">✅ Already rated</span>
+      <div class="star-input" data-val="0" style="margin:10px 0;">
+        <span data-val="1">★</span>
+        <span data-val="2">★</span>
+        <span data-val="3">★</span>
+        <span data-val="4">★</span>
+        <span data-val="5">★</span>
+      </div>
+      <div class="escrow-pending-item-actions">
+        <button data-rate-id="${id}">Submit Rating</button>
       </div>
     </div>`;
   }
-  return `<div class="escrow-pending-item">
-    <div class="escrow-pending-item-title">${listing.title}</div>
-    <div class="escrow-pending-item-meta">
-      <span>Seller: ${sellerShort}</span>
-      <span>Listing #${id}</span>
-    </div>
-    <div class="star-input" data-val="0" style="margin:10px 0;">
-      <span data-val="1">★</span>
-      <span data-val="2">★</span>
-      <span data-val="3">★</span>
-      <span data-val="4">★</span>
-      <span data-val="5">★</span>
-    </div>
-    <div class="escrow-pending-item-actions">
-      <button data-rate-id="${id}">Submit Rating</button>
-    </div>
-  </div>`;
 }
 
 async function handleRate(btn, id, stars) {
