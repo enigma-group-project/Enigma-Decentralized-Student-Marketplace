@@ -103,7 +103,7 @@ async function fetchRating(address) {
 async function hasListingBeenRated(listingId) {
   try {
     const rc = readContracts();
-    return await rc.reputation.listingRated(listingId);
+    return await rc.reputation.sellerRatedBuyer(listingId);
   } catch (_) { return false; }
 }
 
