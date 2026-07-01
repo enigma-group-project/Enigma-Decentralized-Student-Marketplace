@@ -103,7 +103,7 @@ async function fetchRating(address) {
 async function hasListingBeenRated(listingId) {
   try {
     const rc = readContracts();
-    return await rc.reputation.listingRated(listingId);
+    return await rc.reputation.sellerRatedBuyer(listingId);
   } catch (_) { return false; }
 }
 
@@ -223,12 +223,11 @@ function buildCard(id, listing, status, isMineView, sellerRating = " <span class
   if (isSeller && status === "Pending") {
     actions += `<button class="cancel-listing-pending danger-outline" data-id="${id}">✕ Cancel & Refund Buyer</button>`;
   }
-  // Only the BUYER can rate the seller (per deployed contract — listingRated tracks buyer→seller only)
-  if (isBuyer && status === "Sold") {
+  if (isSeller && status === "Sold") {
     if (alreadyRated) {
-      actions += `<button class="rate-seller secondary" disabled>✅ Seller Rated</button>`;
+      actions += `<button class="rate-buyer secondary" disabled>✅ Buyer Rated</button>`;
     } else {
-      actions += `<button class="rate-seller" data-id="${id}">⭐ Rate Seller</button>`;
+      actions += `<button class="rate-buyer" data-id="${id}">⭐ Rate Buyer</button>`;
     }
   }
 
