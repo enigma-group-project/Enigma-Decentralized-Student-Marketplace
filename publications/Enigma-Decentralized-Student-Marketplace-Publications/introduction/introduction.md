@@ -23,7 +23,7 @@ We assume mutually distrusting buyers and sellers, a curious public (all on-chai
 - **Adversary goals:** steal escrowed funds, obtain goods without paying, mint credits without authority, or forge and inflate reputation.
 - **Capabilities:** reentrant callbacks during token transfers, replayed or front-run transactions, malicious or non-compliant ERC-20 interactions, and calls from unauthorized accounts.
 - **Trust assumptions:** the Ethereum consensus layer is honest; the Solidity 0.8.20 compiler and OpenZeppelin v5.1.0 libraries are trusted; *no* off-chain trusted third party arbitrates trades.
-- **Defensive posture:** owner-gated issuance, checks-effects-interactions ordering with `ReentrancyGuard` and `SafeERC20`, one-rating-per-completed-sale binding, a `Pausable` emergency stop, and checked arithmetic with explicit custom errors.
+- **Defensive posture:** owner-gated issuance, checks-effects-interactions ordering with `ReentrancyGuard` and `SafeERC20`, one-rating-per-participant-per-completed-sale binding, a `Pausable` emergency stop, and checked arithmetic with explicit custom errors.
 
 The central risk is a settlement-time violation in which a buyer or seller extracts value before the contract reaches a consistent state; escrow ordering and reentrancy guards close this window.
 
