@@ -7,7 +7,7 @@ import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20P
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title EnigCredit (ENGC) — Slice 1 (Token + Wallet)  [STUDENT TEMPLATE]
-/// @notice Implement TODO(member1). Baseline: ERC20 + ERC20Burnable + ERC20Permit + Ownable.
+/// @notice Implemented (member1). Baseline: ERC20 + ERC20Burnable + ERC20Permit + Ownable.
 ///         burn/burnFrom (Burnable) and permit/nonces (Permit) are inherited — implement mint.
 contract EnigCredit is ERC20, ERC20Burnable, ERC20Permit, Ownable {
     constructor()

@@ -203,7 +203,7 @@ The hosted demo deploys against a Sepolia RPC endpoint. The free tier from [Alch
 Then deploy with that URL (keep the key out of git — export it in your shell):
 ```bash
 export SEPOLIA_RPC_URL="https://eth-sepolia.g.alchemy.com/v2/<API-KEY>"
-export PRIVATE_KEY="0x<deployer-key-with-sepolia-ETH>"
+export PRIVATE_KEY=<redacted>   # your deployer key — never commit a real key
 forge script script/Deploy.s.sol:Deploy --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify
 ```
 Paste the printed Sepolia addresses into `frontend/src/shared/config.js`, set `DEFAULT_NETWORK="sepolia"`, and push.
