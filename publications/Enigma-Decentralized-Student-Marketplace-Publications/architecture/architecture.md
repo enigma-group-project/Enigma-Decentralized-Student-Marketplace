@@ -4,7 +4,7 @@
 
 Enigma comprises three Solidity 0.8.20 contracts on the audited OpenZeppelin v5.1.0 library set — `EnigCredit` (ERC-20), `Marketplace` (listings and escrow), and `Reputation` — with a vanilla ethers.js front end targeting a local Anvil chain (chainId 31337) or Sepolia (11155111) at runtime; reads use a JSON-RPC provider and writes are wallet-signed.
 
-**Security by standards.** Security is inherited from standards rather than hand-rolled: each primitive reuses an audited OpenZeppelin module, and ENGC is a standard ERC-20 with EIP-2612 `permit` for off-chain approvals. The threat mitigations of the threat model (owner-gated issuance, CEI ordering with `ReentrancyGuard`/`SafeERC20`, one-rating-per-sale binding, a `Pausable` stop, and checked arithmetic) are realized directly atop these audited modules, and verified in CI by unit, fuzz, and invariant tests alongside Slither static analysis.
+**Security by standards.** Security is inherited from standards rather than hand-rolled: each primitive reuses an audited OpenZeppelin module, and ENGC is a standard ERC-20 with EIP-2612 `permit` for off-chain approvals. The threat mitigations of the threat model (owner-gated issuance, CEI ordering with `ReentrancyGuard`/`SafeERC20`, one-rating-per-participant-per-sale binding, a `Pausable` stop, and checked arithmetic) are realized directly atop these audited modules, and verified in CI by unit, fuzz, and invariant tests alongside Slither static analysis.
 
 | Threat | Mitigation |
 | --- | --- |
