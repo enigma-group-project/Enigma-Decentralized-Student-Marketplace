@@ -44,4 +44,4 @@ Per-operation cost, **measured** via `forge test --gas-report` (avg per call) �
 | Slice 3 — Escrow + Ratings | Member 3 | **complete** (EscrowTest passing, incl. `purchaseWithPermit`) |
 | Slice 4 — Reputation | Member 4 | **complete** (ReputationTest passing; measured 120,280 gas `rateUser`) |
 
-> All four slices pass their suites — **32/32 tests** including fuzz/invariant (`Invariant.t.sol`) — with no high-severity Slither findings.
+> All four slices pass their suites — **31/31 tests** including fuzz/invariant (`Invariant.t.sol`) — with no high-severity Slither findings.
